@@ -74,6 +74,9 @@ jobs:
         with:
           path: artifacts/
 
+      - name: Wait before uploading release assets
+        run: sleep 60  # Wait 60 seconds to allow artifact propagation
+
       - name: Create "Latest Build" Release
         uses: softprops/action-gh-release@v2
         with:
