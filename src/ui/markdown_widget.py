@@ -34,26 +34,30 @@ class MarkdownText(ctk.CTkTextbox):
             tb.insert("end", f"\nPage {page_num}\n", "h2")
             tb.insert("end", "-" * 40 + "\n")
             for item in results:
-                if item['type'] == 'text':
-                    self._insert_rich_text(item['text'] + "\n")
-                elif item['type'] == 'image' and 'image_obj' in item:
-                    self._insert_image(item['image_obj'])
+                if item["type"] == "text":
+                    self._insert_rich_text(item["text"] + "\n")
+                elif item["type"] == "image" and "image_obj" in item:
+                    self._insert_image(item["image_obj"])
         else:
             tb.insert("end", f"\n--- Page {page_num} ---\n")
             for item in results:
-                if item['type'] == 'text':
-                    tb.insert("end", item['text'] + "\n")
+                if item["type"] == "text":
+                    tb.insert("end", item["text"] + "\n")
 
         tb.configure(state="disabled")
         tb.see("end")
 
     def _insert_rich_text(self, text):
         tb = self._textbox
-        parts = re.split(r'(\*\*.*?\*\*|\*.*?\*)', text)
+        parts = re.split(r"(\*\*.*?\*\*|\*.*?\*)", text)
         for part in parts:
             if part.startswith("**") and part.endswith("**"):
                 tb.insert("end", part[2:-2], "bold")
-            elif part.startswith("*") and part.endswith("*") and not part.startswith("**"):
+            elif (
+                part.startswith("*")
+                and part.endswith("*")
+                and not part.startswith("**")
+            ):
                 tb.insert("end", part[1:-1], "italic")
             else:
                 tb.insert("end", part)
@@ -64,7 +68,9 @@ class MarkdownText(ctk.CTkTextbox):
             max_w = 350
             if pil_img.width > max_w:
                 ratio = max_w / pil_img.width
-                pil_img = pil_img.resize((max_w, int(pil_img.height * ratio)), Image.Resampling.BILINEAR)
+                pil_img = pil_img.resize(
+                    (max_w, int(pil_img.height * ratio)), Image.Resampling.BILINEAR
+                )
 
             tk_img = ImageTk.PhotoImage(pil_img)
             self._images.append(tk_img)

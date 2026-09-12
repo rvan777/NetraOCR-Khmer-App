@@ -19,7 +19,9 @@ class OCRWorker:
         self.current_decoder = None
 
         # PERFORMANCE FIX: Create ONE temp file and reuse it for all pages
-        self._temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name  # noqa: SIM115
+        self._temp_file = tempfile.NamedTemporaryFile(
+            suffix=".png", delete=False
+        ).name
 
     def process(self, mode_config, rich_text_mode):
         try:
@@ -27,9 +29,7 @@ class OCRWorker:
             if self.pipeline is None or self.current_decoder != decoder:
                 self.result_queue.put({"type": "status", "msg": "Loading OCR model..."})
                 self.pipeline = KhmerOCRPipeline(
-                    detector="yolo",
-                    conf=mode_config["conf"],
-                    decoder=decoder
+                    detector="yolo", conf=mode_config["conf"], decoder=decoder
                 )
                 self.current_decoder = decoder
 
@@ -37,7 +37,9 @@ class OCRWorker:
 
             for page_num in range(total_pages):
                 # Send progress update to UI
-                self.result_queue.put({"type": "progress", "value": (page_num + 1) / total_pages})
+                self.result_queue.put(
+                    {"type": "progress", "value": (page_num + 1) / total_pages}
+                )
 
                 # Get image in memory
                 img = self.doc_handler.get_page_image(page_num, dpi=150)
@@ -52,7 +54,7 @@ class OCRWorker:
                     output_path=None,
                     beam_width=mode_config["beam_width"],
                     batch_size=16,
-                    return_segments=return_segments
+                    return_segments=return_segments,
                 )
 
                 # ✅ FIX: Handle the return value based on the return_segments flag
@@ -63,8 +65,12 @@ class OCRWorker:
                     meta = None
 
                 # Parse results and send to UI
-                page_results = self._parse_results(result_text, meta, page_num + 1, img, rich_text_mode)
-                self.result_queue.put({"type": "page_done", "page": page_num + 1, "results": page_results})
+                page_results = self._parse_results(
+                    result_text, meta, page_num + 1, img, rich_text_mode
+                )
+                self.result_queue.put(
+                    {"type": "page_done", "page": page_num + 1, "results": page_results}
+                )
 
             self.result_queue.put({"type": "finished"})
         except Exception as e:  # noqa: BLE001
@@ -74,32 +80,46 @@ class OCRWorker:
         results = []
 
         # 1. Process Text
-        for i, line in enumerate(result_text.split('\n')):
+        for i, line in enumerate(result_text.split("\n")):
             text = line.strip()
             if text:
-                khmer_chars = len(re.findall(r'[\u1780-\u17FF]', text))
+                khmer_chars = len(re.findall(r"[\u1780-\u17FF]", text))
                 total_chars = len(text)
-                acc = min(99.0, 90.0 + ((khmer_chars / total_chars) * 9.0)) if total_chars > 0 else 90.0
-                results.append({
-                    "page": page_num, "line": len(results) + 1,
-                    "text": text, "accuracy": acc, "type": "text"
-                })
+                acc = (
+                    min(99.0, 90.0 + ((khmer_chars / total_chars) * 9.0))
+                    if total_chars > 0
+                    else 90.0
+                )
+                results.append(
+                    {
+                        "page": page_num,
+                        "line": len(results) + 1,
+                        "text": text,
+                        "accuracy": acc,
+                        "type": "text",
+                    }
+                )
 
         # 2. Process Images (IN-MEMORY CROPPING) - Only if meta exists
         if rich_text_mode and meta:
-            segments = meta.get('segments', [])
-            segments.sort(key=lambda s: s['bbox'][1])
+            segments = meta.get("segments", [])
+            segments.sort(key=lambda s: s["bbox"][1])
             for seg in segments:
-                if seg['type'] == 'logo':
+                if seg["type"] == "logo":
                     try:
-                        x1, y1, x2, y2 = [int(c) for c in seg['bbox']]
+                        x1, y1, x2, y2 = [int(c) for c in seg["bbox"]]
                         # Crop directly from the original_img in memory! No disk I/O!
                         logo_crop = original_img.crop((x1, y1, x2, y2))
-                        results.append({
-                            "page": page_num, "line": len(results) + 1,
-                            "text": "[Image]", "accuracy": 100.0,
-                            "type": "image", "image_obj": logo_crop
-                        })
+                        results.append(
+                            {
+                                "page": page_num,
+                                "line": len(results) + 1,
+                                "text": "[Image]",
+                                "accuracy": 100.0,
+                                "type": "image",
+                                "image_obj": logo_crop,
+                            }
+                        )
                     except Exception as e:  # noqa: BLE001
                         print(f"Warning: Could not crop logo: {e}")
         return results
