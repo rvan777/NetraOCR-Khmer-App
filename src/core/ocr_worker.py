@@ -19,7 +19,7 @@ class OCRWorker:
         self.current_decoder = None
 
         # PERFORMANCE FIX: Create ONE temp file and reuse it for all pages
-        self._temp_file = tempfile.NamedTemporaryFile(
+        self._temp_file = tempfile.NamedTemporaryFile(  # noqa: SIM115
             suffix=".png", delete=False
         ).name
 
