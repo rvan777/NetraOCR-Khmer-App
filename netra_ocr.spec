@@ -1,18 +1,47 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
+from PyInstaller.utils.hooks import collect_all, collect_data_files
 
 block_cipher = None
 
+# 1. Force collect EVERYTHING for tkinter, customtkinter, and torchvision
+datas_tk, binaries_tk, hiddenimports_tk = collect_all('tkinter')
+datas_ctk, binaries_ctk, hiddenimports_ctk = collect_all('customtkinter')
+datas_tv, binaries_tv, hiddenimports_tv = collect_all('torchvision')
+
+# 2. CRITICAL FIX: Collect all data files (like .pt model weights) from netra_ocr
+datas_netra = collect_data_files('netra_ocr', include_py_files=False)
+
+# 3. Explicitly add your local project modules to hidden imports
+local_hidden_imports = [
+    'core',
+    'core.document_handler',
+    'core.ocr_worker',
+    'ui',
+    'ui.markdown_widget',
+    'utils',
+    'utils.exporter',
+    'PIL',
+    'PIL.Image',
+    'PIL.ImageTk',
+    'fitz',
+    'pymupdf',
+    'netra_ocr',
+    'netra_ocr.ocr_engine',
+    'netra_ocr.detectors.yolo', # Ensure YOLO detector hooks are triggered
+]
+
 a = Analysis(
     ['src/app.py'],
-    pathex=[],
-    binaries=[],
-    datas=[('src', 'src')],
-    hiddenimports=[],
+    pathex=['src'],  # Tells PyInstaller to look in 'src' for local imports
+    binaries=binaries_tk + binaries_ctk + binaries_tv,
+    # Add datas_netra to the datas list
+    datas=[('src', 'src')] + datas_tk + datas_ctk + datas_tv + datas_netra,
+    hiddenimports=hiddenimports_tk + hiddenimports_ctk + hiddenimports_tv + local_hidden_imports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['test', 'tests'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -65,6 +94,8 @@ if sys.platform == 'darwin':
             'CFBundleName': 'Netra OCR',
             'CFBundleDisplayName': 'Netra OCR',
             'NSHighResolutionCapable': True,
+            'CFBundleShortVersionString': '0.0.1',
+            'CFBundleVersion': '0.0.1',
         },
     )
 
