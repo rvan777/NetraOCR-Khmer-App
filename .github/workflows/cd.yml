@@ -75,7 +75,7 @@ jobs:
           path: artifacts/
 
       - name: Wait before uploading release assets
-        run: sleep 120  # Wait 60 seconds to allow artifact propagation
+        run: sleep 120  # Wait 120 seconds to allow artifact propagation
 
       - name: Create "Latest Build" Release
         uses: softprops/action-gh-release@v2
@@ -85,7 +85,10 @@ jobs:
           body: |
             Automated build triggered by merge to main.
             Commit: ${{ github.event.head_commit.message }}
-          files: artifacts/**/*
+          files: |
+            artifacts/NetraOCR-windows-latest/NetraOCR-Windows.zip
+            artifacts/NetraOCR-macos-latest/NetraOCR-macOS.app.zip
+            artifacts/NetraOCR-ubuntu-latest/NetraOCR-Linux.tar.gz
           draft: false
           prerelease: true
           fail_on_unmatched_files: false
