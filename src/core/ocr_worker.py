@@ -10,6 +10,7 @@ if CUSTOM_MODEL_DIR:
     # Point HuggingFace cache to our local directory
     os.environ["HF_HOME"] = CUSTOM_MODEL_DIR
 
+
 class OCRWorker:
     def __init__(self, doc_handler, result_queue):
         self.doc_handler = doc_handler
@@ -18,7 +19,7 @@ class OCRWorker:
         self.current_decoder = None
 
         # PERFORMANCE FIX: Create ONE temp file and reuse it for all pages
-        self._temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name # noqa: SIM115
+        self._temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name  # noqa: SIM115
 
     def process(self, mode_config, rich_text_mode):
         try:
@@ -66,7 +67,7 @@ class OCRWorker:
                 self.result_queue.put({"type": "page_done", "page": page_num + 1, "results": page_results})
 
             self.result_queue.put({"type": "finished"})
-        except Exception as e: # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             self.result_queue.put({"type": "error", "msg": str(e)})
 
     def _parse_results(self, result_text, meta, page_num, original_img, rich_text_mode):

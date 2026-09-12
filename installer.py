@@ -1,7 +1,5 @@
 import os
 import sys
-import subprocess
-import shutil
 from pathlib import Path
 
 INSTALL_DIR = Path.home() / ".netra_ocr"
