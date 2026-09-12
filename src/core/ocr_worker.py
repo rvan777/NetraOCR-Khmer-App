@@ -1,6 +1,7 @@
-import re
 import os
+import re
 import tempfile
+
 from netra_ocr.ocr_engine import KhmerOCRPipeline
 
 # Check for custom model directory set by installer
@@ -17,7 +18,7 @@ class OCRWorker:
         self.current_decoder = None
 
         # PERFORMANCE FIX: Create ONE temp file and reuse it for all pages
-        self._temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name
+        self._temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name # noqa: SIM115
 
     def process(self, mode_config, rich_text_mode):
         try:
@@ -65,7 +66,7 @@ class OCRWorker:
                 self.result_queue.put({"type": "page_done", "page": page_num + 1, "results": page_results})
 
             self.result_queue.put({"type": "finished"})
-        except Exception as e:
+        except Exception as e: # noqa: BLE001
             self.result_queue.put({"type": "error", "msg": str(e)})
 
     def _parse_results(self, result_text, meta, page_num, original_img, rich_text_mode):
@@ -95,11 +96,11 @@ class OCRWorker:
                         logo_crop = original_img.crop((x1, y1, x2, y2))
                         results.append({
                             "page": page_num, "line": len(results) + 1,
-                            "text": f"[Image]", "accuracy": 100.0,
+                            "text": "[Image]", "accuracy": 100.0,
                             "type": "image", "image_obj": logo_crop
                         })
-                    except Exception:
-                        pass
+                    except Exception as e:  # noqa: BLE001
+                        print(f"Warning: Could not crop logo: {e}")
         return results
 
     def cleanup(self):

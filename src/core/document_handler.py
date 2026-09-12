@@ -4,8 +4,8 @@ import re
 import tempfile
 
 import pymupdf
-from PIL import Image
 from netra_ocr.ocr_engine import KhmerOCRPipeline
+from PIL import Image
 
 # Check for custom model directory set by installer
 CUSTOM_MODEL_DIR = os.environ.get("NETRA_OCR_MODEL_DIR")
@@ -92,8 +92,8 @@ class OCRWorker:
                             "text": "[Image]", "accuracy": 100.0,
                             "type": "image", "image_obj": logo_crop
                         })
-                    except Exception:  # noqa: BLE001
-                        pass
+                    except Exception as e:  # noqa: BLE001
+                        print(f"Warning: Could not crop logo: {e}")
         return results
 
     def cleanup(self):
