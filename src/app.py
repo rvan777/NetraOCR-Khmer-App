@@ -1,8 +1,8 @@
-import customtkinter as ctk
-
-from tkinter import filedialog, messagebox, Menu
 import queue
 import threading
+from tkinter import Menu, filedialog, messagebox
+
+import customtkinter as ctk
 
 from core.document_handler import DocumentHandler
 from core.ocr_worker import OCRWorker

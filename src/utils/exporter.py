@@ -1,7 +1,9 @@
+import io
+
 import openpyxl
 from docx import Document
 from docx.shared import Inches
-import io
+
 
 def export_results(choice, extracted_results, show_lines, show_acc, path):
     ext_map = {
@@ -41,7 +43,6 @@ def export_results(choice, extracted_results, show_lines, show_acc, path):
                     if show_acc: line += f"  [Acc: {item['accuracy']:.1f}%]"
                     doc.add_paragraph(line)
                 elif item['type'] == 'image' and 'image_obj' in item:
-                    # PERFORMANCE FIX: Embed in-memory PIL image directly into DOCX via BytesIO
                     img_byte_arr = io.BytesIO()
                     item['image_obj'].save(img_byte_arr, format='PNG')
                     img_byte_arr.seek(0)
@@ -65,5 +66,5 @@ def export_results(choice, extracted_results, show_lines, show_acc, path):
             wb.save(path)
 
         return True, path
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return False, str(e)

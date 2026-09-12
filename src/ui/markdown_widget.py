@@ -1,6 +1,8 @@
 import re
+
 import customtkinter as ctk
 from PIL import Image, ImageTk
+
 
 class MarkdownText(ctk.CTkTextbox):
     def __init__(self, master, **kwargs):
@@ -25,7 +27,6 @@ class MarkdownText(ctk.CTkTextbox):
         tb.configure(state="disabled")
 
     def append_page(self, page_num, results, is_rich):
-        """Incrementally appends a page to the UI without blocking."""
         tb = self._textbox
         tb.configure(state="normal")
 
@@ -44,7 +45,7 @@ class MarkdownText(ctk.CTkTextbox):
                     tb.insert("end", item['text'] + "\n")
 
         tb.configure(state="disabled")
-        tb.see("end")  # Auto-scroll to bottom
+        tb.see("end")
 
     def _insert_rich_text(self, text):
         tb = self._textbox
@@ -70,5 +71,5 @@ class MarkdownText(ctk.CTkTextbox):
             tb.insert("end", "\n")
             tb.image_create("end", image=tk_img)
             tb.insert("end", "\n")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             tb.insert("end", f"[Image Error: {e}]\n")
