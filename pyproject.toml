@@ -1,0 +1,14 @@
+[project]
+name = "netraocr-khmer"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "customtkinter>=6.0.0",
+    "markdown>=3.10.3",
+    "netra-ocr>=1.0.0",
+    "openpyxl>=3.1.5",
+    "pillow>=10.4.0",
+    "pymupdf>=1.28.2",
+    "tkhtmlview>=0.3.1",
+    "tkinterweb>=4.25.3",
+]
