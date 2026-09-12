@@ -1,9 +1,8 @@
-name: CD - Build & Release
+name: CD - Build & Release App
 
 on:
   push:
-    tags:
-      - 'v*'  # Trigger on version tags like v1.0.0
+    branches: [ main ]  # Triggers ONLY when merged to main
 
 jobs:
   build:
@@ -26,32 +25,36 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Build with PyInstaller (Windows)
+    # --- WINDOWS BUILD ---
+    - name: Build Windows Executable
       if: matrix.os == 'windows-latest'
       run: pyinstaller --noconfirm --onefile --windowed --name "NetraOCR" --add-data "src;src" src/app.py
 
-    - name: Build with PyInstaller (macOS)
+    # --- MACOS BUILD ---
+    - name: Build macOS App Bundle
       if: matrix.os == 'macos-latest'
       run: |
         pyinstaller netra_ocr.spec --clean
-        # Zip the .app bundle for distribution
         cd dist && zip -r NetraOCR-macOS.app.zip NetraOCR.app
 
-    - name: Build with PyInstaller (Linux)
+    # --- LINUX BUILD ---
+    - name: Build Linux Executable
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y libgl1 libglib2.0-0 libxrender1 libxext6
         pyinstaller --noconfirm --onefile --windowed --name "NetraOCR" --add-data "src:src" src/app.py
 
-    - name: Upload Artifacts
+    # --- UPLOAD ARTIFACTS ---
+    - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: NetraOCR-${{ matrix.os }}
         path: dist/
 
+  # --- CREATE GITHUB RELEASE ---
   release:
-    name: Create GitHub Release
+    name: Create Release
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -59,11 +62,16 @@ jobs:
       with:
         path: artifacts/
 
-    - name: Create Release
+    - name: Create "Latest Build" Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: latest-build-${{ github.sha }}
+        name: "Latest Continuous Build (${{ github.sha }})"
+        body: |
+          Automated build triggered by merge to main.
+          Commit: ${{ github.event.head_commit.message }}
         files: artifacts/**/*
         draft: false
-        prerelease: false
+        prerelease: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
