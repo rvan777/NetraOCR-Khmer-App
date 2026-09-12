@@ -2,7 +2,12 @@ name: CD - Build & Release App
 
 on:
   push:
-    branches: [ main ]  # Triggers ONLY when merged to main
+    tags:
+      - 'v*' # Trigger on version tag like v1.0.0
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   build:
@@ -57,6 +62,7 @@ jobs:
         with:
           name: NetraOCR-${{ matrix.os }}
           path: dist/
+          retention-days: 1
 
   # --- CREATE GITHUB RELEASE ---
   release:
@@ -69,7 +75,7 @@ jobs:
           path: artifacts/
 
       - name: Create "Latest Build" Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-build-${{ github.sha }}
           name: "Latest Continuous Build (${{ github.sha }})"
