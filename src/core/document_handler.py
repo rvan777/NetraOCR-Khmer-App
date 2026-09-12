@@ -1,7 +1,10 @@
+import io
 import os
 import re
 import tempfile
 
+import pymupdf
+from PIL import Image
 from netra_ocr.ocr_engine import KhmerOCRPipeline
 
 # Check for custom model directory set by installer
