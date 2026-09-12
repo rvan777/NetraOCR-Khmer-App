@@ -10,7 +10,7 @@ from ui.markdown_widget import MarkdownText
 from utils.exporter import export_results
 
 ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("blue")
+ctk.set_default_color_theme("green")
 
 
 class KhmerOCRApp(ctk.CTk):
