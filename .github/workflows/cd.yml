@@ -26,24 +26,29 @@ jobs:
           pip install -r requirements.txt
 
       # --- WINDOWS BUILD ---
-      - name: Build Windows Executable
+      - name: Build with PyInstaller (Windows)
         if: matrix.os == 'windows-latest'
-        run: pyinstaller --noconfirm --onefile --windowed --name "NetraOCR" --add-data "src;src" src/app.py
+        run: |
+          pyinstaller netra_ocr.spec --clean
+          # Zip the output folder for easier downloading
+          cd dist && powershell Compress-Archive -Path NetraOCR -DestinationPath NetraOCR-Windows.zip
 
-      # --- MACOS BUILD ---
-      - name: Build macOS App Bundle
+      # --- macOS BUILD ---
+      - name: Build with PyInstaller (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           pyinstaller netra_ocr.spec --clean
+          # Zip the .app bundle for distribution
           cd dist && zip -r NetraOCR-macOS.app.zip NetraOCR.app
 
-      # --- LINUX BUILD ---
-      - name: Build Linux Executable
+      # --- Linux BUILD ---
+      - name: Build with PyInstaller (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgl1 libglib2.0-0 libxrender1 libxext6
-          pyinstaller --noconfirm --onefile --windowed --name "NetraOCR" --add-data "src:src" src/app.py
+          pyinstaller netra_ocr.spec --clean
+          cd dist && tar -czf NetraOCR-Linux.tar.gz NetraOCR
 
       # --- UPLOAD ARTIFACTS ---
       - name: Upload Build Artifacts
