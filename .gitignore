@@ -13,7 +13,6 @@ __pycache__/
 build/
 dist/
 *.egg-info/
-*.spec
 *.pyz
 
 # Environments
