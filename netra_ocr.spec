@@ -33,15 +33,23 @@ local_hidden_imports = [
 
 a = Analysis(
     ['src/app.py'],
-    pathex=['src'],  # Tells PyInstaller to look in 'src' for local imports
+    pathex=['src'],
     binaries=binaries_tk + binaries_ctk + binaries_tv,
-    # Add datas_netra to the datas list
     datas=[('src', 'src')] + datas_tk + datas_ctk + datas_tv + datas_netra,
     hiddenimports=hiddenimports_tk + hiddenimports_ctk + hiddenimports_tv + local_hidden_imports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['test', 'tests'],
+    # ✅ Add heavy, unused PyTorch modules to excludes to save space
+    excludes=[
+        'test', 'tests',
+        'torch.distributed',
+        'torch.testing',
+        'torch.onnx',
+        'torch.fx',
+        'torch.utils.bottleneck',
+        'torch.backends.cuda', # We are using CPU-only anyway
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
