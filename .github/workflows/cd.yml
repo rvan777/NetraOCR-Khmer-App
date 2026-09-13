@@ -53,6 +53,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgl1 libglib2.0-0 libxrender1 libxext6
+          pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cpu
           pyinstaller netra_ocr.spec --clean
           cd dist && tar -czf NetraOCR-Linux.tar.gz NetraOCR
 
